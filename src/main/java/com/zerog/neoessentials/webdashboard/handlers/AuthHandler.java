@@ -70,13 +70,67 @@ public class AuthHandler implements HttpHandler {
             JsonObject request = com.google.gson.JsonParser.parseString(body).getAsJsonObject();
             
             String username = request.has("username") ? request.get("username").getAsString() : null;
+            String password = request.has("password") ? request.get("password").getAsString() : null;
             
             if (username == null || username.isEmpty()) {
                 sendError(exchange, 400, "Username is required");
                 return;
             }
             
-            // Check if player is online
+            // Password-based authentication (new registration system)
+            if (password != null && !password.isEmpty()) {
+                com.zerog.neoessentials.webdashboard.security.AuthenticationManager authManager = 
+                    com.zerog.neoessentials.webdashboard.security.AuthenticationManager.getInstance();
+                
+                String ipAddress = exchange.getRemoteAddress().getAddress().getHostAddress();
+                String userAgent = exchange.getRequestHeaders().getFirst("User-Agent");
+                
+                com.zerog.neoessentials.webdashboard.security.Session authSession = 
+                    authManager.authenticate(username, password, ipAddress, userAgent != null ? userAgent : "Dashboard");
+                
+                if (authSession == null) {
+                    sendError(exchange, 401, "Invalid username or password");
+                    return;
+                }
+                
+                // Also store in AuthHandler sessions for backwards compatibility with token validation
+                String token = authSession.getSessionId();
+                boolean isAdmin = authSession.getRole() == com.zerog.neoessentials.webdashboard.security.User.Role.ADMIN;
+                SessionData session = new SessionData(
+                    authSession.getUsername(),
+                    authSession.getUserId(),
+                    "password",
+                    isAdmin,
+                    System.currentTimeMillis()
+                );
+                sessions.put(token, session);
+                
+                // Send response
+                JsonObject response = new JsonObject();
+                response.addProperty("success", true);
+                response.addProperty("token", token);
+                response.addProperty("sessionId", token);
+                response.addProperty("username", authSession.getUsername());
+                response.addProperty("isAdmin", isAdmin);
+                response.addProperty("authType", "password");
+                
+                // Add user object for frontend
+                JsonObject userObj = new JsonObject();
+                userObj.addProperty("username", authSession.getUsername());
+                userObj.addProperty("role", authSession.getRole().name());
+                userObj.addProperty("isAdmin", isAdmin);
+                response.add("user", userObj);
+                
+                if (authSession.requiresPasswordChange()) {
+                    response.addProperty("requiresPasswordChange", true);
+                }
+                
+                sendJson(exchange, 200, response.toString());
+                LOGGER.info("User {} authenticated to dashboard via password (admin: {})", username, isAdmin);
+                return;
+            }
+            
+            // Legacy Minecraft authentication (no password — requires player to be online)
             ServerPlayer player = server.getPlayerList().getPlayerByName(username);
             if (player == null) {
                 sendError(exchange, 401, "Player must be online on the server to authenticate");
@@ -408,7 +462,7 @@ public class AuthHandler implements HttpHandler {
     private void sendJson(HttpExchange exchange, int code, String json) throws IOException {
         byte[] response = json.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+        com.zerog.neoessentials.webdashboard.security.CorsHandler.apply(exchange);
         exchange.sendResponseHeaders(code, response.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response);

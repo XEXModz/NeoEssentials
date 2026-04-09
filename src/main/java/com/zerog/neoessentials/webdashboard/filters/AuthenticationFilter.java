@@ -69,9 +69,7 @@ public class AuthenticationFilter extends Filter {
         
         // Allow OPTIONS preflight for CORS
         if ("OPTIONS".equals(method)) {
-            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            com.zerog.neoessentials.webdashboard.security.CorsHandler.applyFull(exchange, "GET, POST, PUT, DELETE, OPTIONS", "Content-Type, Authorization");
             exchange.sendResponseHeaders(204, -1);
             return;
         }
@@ -280,7 +278,7 @@ public class AuthenticationFilter extends Filter {
         error.addProperty("timestamp", System.currentTimeMillis());
         byte[] response = GSON.toJson(error).getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        com.zerog.neoessentials.webdashboard.security.CorsHandler.apply(exchange);
         exchange.sendResponseHeaders(401, response.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response);
@@ -298,7 +296,7 @@ public class AuthenticationFilter extends Filter {
         
         byte[] response = GSON.toJson(error).getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        com.zerog.neoessentials.webdashboard.security.CorsHandler.apply(exchange);
         exchange.sendResponseHeaders(403, response.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response);

@@ -2267,6 +2267,44 @@ public class ConfigManager {
     }
 
     /**
+     * Returns whether CORS is enabled for the web dashboard.
+     * Reads webDashboard.enableCORS. Defaults to true for backwards compatibility.
+     */
+    public boolean isCorsEnabled() {
+        JsonObject config = getConfig(MAIN_CONFIG);
+        try {
+            if (config.has("webDashboard")) {
+                JsonObject wd = config.getAsJsonObject("webDashboard");
+                if (wd.has("enableCORS")) {
+                    return wd.get("enableCORS").getAsBoolean();
+                }
+            }
+        } catch (Exception ignored) {}
+        return true;
+    }
+
+    /**
+     * Returns the allowed CORS origin for the web dashboard.
+     * Reads webDashboard.corsAllowedOrigin. If not set, returns the dashboard URL.
+     * Set to "*" to allow all origins (NOT recommended for production).
+     */
+    public String getCorsAllowedOrigin() {
+        JsonObject config = getConfig(MAIN_CONFIG);
+        try {
+            if (config.has("webDashboard")) {
+                JsonObject wd = config.getAsJsonObject("webDashboard");
+                if (wd.has("corsAllowedOrigin")) {
+                    String origin = wd.get("corsAllowedOrigin").getAsString();
+                    if (origin != null && !origin.trim().isEmpty()) {
+                        return origin.trim();
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return "";
+    }
+
+    /**
      * Returns max command length from security.maxCommandLength.
      * Defaults to 256 if not set.
      */

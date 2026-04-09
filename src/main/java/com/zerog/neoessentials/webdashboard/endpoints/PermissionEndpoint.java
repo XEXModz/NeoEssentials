@@ -728,7 +728,7 @@ public class PermissionEndpoint implements HttpHandler {
         byte[] bytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
 
         exchange.getResponseHeaders().set("Content-Type", "application/json");
-        exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+        com.zerog.neoessentials.webdashboard.security.CorsHandler.apply(exchange);
         exchange.sendResponseHeaders(statusCode, bytes.length);
 
         try (OutputStream os = exchange.getResponseBody()) {

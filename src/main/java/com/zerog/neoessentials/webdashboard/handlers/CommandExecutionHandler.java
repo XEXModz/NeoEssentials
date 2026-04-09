@@ -45,10 +45,8 @@ public class CommandExecutionHandler implements HttpHandler {
     
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        // Add CORS headers
-        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+        // Apply CORS headers from config
+        com.zerog.neoessentials.webdashboard.security.CorsHandler.applyWithMethods(exchange, "POST, GET, OPTIONS");
         
         // Handle OPTIONS preflight
         if ("OPTIONS".equals(exchange.getRequestMethod())) {

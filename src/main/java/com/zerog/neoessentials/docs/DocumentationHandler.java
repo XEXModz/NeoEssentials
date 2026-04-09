@@ -345,7 +345,7 @@ public class DocumentationHandler implements HttpHandler {
         byte[] responseBytes = jsonResponse.getBytes(StandardCharsets.UTF_8);
         
         exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
-        exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+        com.zerog.neoessentials.webdashboard.security.CorsHandler.apply(exchange);
         exchange.sendResponseHeaders(statusCode, responseBytes.length);
         
         try (OutputStream os = exchange.getResponseBody()) {

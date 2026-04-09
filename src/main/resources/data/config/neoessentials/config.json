@@ -212,7 +212,9 @@
     "bindAddress": "0.0.0.0",
     "bindAddress_comment": "IP address to bind to. '0.0.0.0' binds to all network interfaces (recommended). Users access the dashboard via http://YOUR_SERVER_IP:8080 (replace YOUR_SERVER_IP with your actual server's IP address or domain). Use '127.0.0.1' for localhost-only access (more secure but only accessible from the server machine itself).",
     "enableCORS": true,
-    "enableCORS_comment": "Enable Cross-Origin Resource Sharing headers. Useful for development and external integrations",
+    "enableCORS_comment": "Enable Cross-Origin Resource Sharing headers. Set to false to disable CORS entirely (most secure). When enabled, only the dashboard's own URL is allowed by default.",
+    "corsAllowedOrigin": "",
+    "corsAllowedOrigin_comment": "Allowed origin for CORS requests. Leave empty to auto-detect from dashboard URL. Set to a specific URL like 'http://yourdomain.com:8080' if using a reverse proxy. NEVER set to '*' in production as it allows any website to access your dashboard API.",
     "maxThreads": 4,
     "maxThreads_comment": "Maximum number of concurrent HTTP request handler threads",
     "apiSettings": {

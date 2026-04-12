@@ -773,7 +773,7 @@
         "command": "l",
         "aliases": ["local", "lc"],
         "prefix": "",
-        "default": true,
+        "default": false,
         "discord": {
           "enabled": false,
           "enabled_comment": "Send local chat messages to Discord. Usually disabled since local is proximity-based.",
@@ -786,7 +786,7 @@
         "command": "g",
         "aliases": ["global", "gc"],
         "prefix": "!",
-        "default": false,
+        "default": true,
         "discord": {
           "enabled": true,
           "enabled_comment": "Send global chat messages to Discord.",

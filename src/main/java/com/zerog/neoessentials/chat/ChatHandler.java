@@ -212,6 +212,7 @@ public class ChatHandler {
                 String chatFormat = chatManager.getChatFormat(group, world);
                 // Cancel the original event to apply custom formatting
                 event.setCanceled(true);
+                try {
                 // Format the message using our custom formatter
                 Component formattedMessage = ChatFormatter.formatMessage(chatFormat, player, message);
                 // Route message based on channel
@@ -337,6 +338,14 @@ public class ChatHandler {
                 } catch (Exception e) {
                     LOGGER.warn("Failed to send chat to Discord integration: {}", e.getMessage());
                     LOGGER.debug("Discord integration error detail:", e);
+                }
+                } catch (Exception formatEx) {
+                    // Formatting or broadcast failed — un-cancel the event so vanilla chat still works
+                    // This prevents new player messages from vanishing when FTB Ranks hasn't
+                    // initialized the player's data yet on first join
+                    LOGGER.warn("Chat formatting failed for player {}, falling back to vanilla: {}",
+                        playerName, formatEx.getMessage());
+                    event.setCanceled(false);
                 }
             } // else: do not cancel event, let vanilla formatting happen
 

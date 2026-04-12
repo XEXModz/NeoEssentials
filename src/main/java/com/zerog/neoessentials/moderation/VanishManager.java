@@ -36,12 +36,17 @@ public class VanishManager {
      */
     public int getPlayerPriority(UUID playerId) {
         // Integrate with permission/group system
-        // Use PermissionSystem.getManager().getUser(playerId).getGroup()
         String group = null;
         try {
-            group = com.zerog.neoessentials.permissions.PermissionSystem.getManager().getUser(playerId).getGroup();
+            var manager = com.zerog.neoessentials.permissions.PermissionSystem.getManager();
+            if (manager != null) {
+                var user = manager.getUser(playerId);
+                if (user != null) {
+                    group = user.getGroup();
+                }
+            }
         } catch (Exception e) {
-            // fallback
+            // fallback to default priority
         }
         if (group == null) return 10;
         switch (group.toLowerCase()) {
@@ -368,8 +373,24 @@ public class VanishManager {
      */
     private void showPlayerToSpecific(ServerPlayer unvanishedPlayer, ServerPlayer observer) {
         try {
-            // Player will be re-added to tab list automatically on respawn/rejoin
-            // For now, we'll rely on the client's natural player discovery
+            // Send player info packet to add the player back to the tab list
+            observer.connection.send(
+                new net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket(
+                    java.util.EnumSet.of(
+                        net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER,
+                        net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket.Action.UPDATE_LISTED
+                    ),
+                    List.of(unvanishedPlayer)
+                )
+            );
+            // Also send the entity add packet so the player model appears in-world
+            observer.connection.send(
+                new net.minecraft.network.protocol.game.ClientboundAddEntityPacket(
+                    unvanishedPlayer,
+                    0,
+                    unvanishedPlayer.blockPosition()
+                )
+            );
         } catch (Exception e) {
             LOGGER.error("Failed to show player {} to {}", unvanishedPlayer.getName().getString(), observer.getName().getString(), e);
         }

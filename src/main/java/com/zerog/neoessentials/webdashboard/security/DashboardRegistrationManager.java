@@ -295,6 +295,11 @@ public class DashboardRegistrationManager {
             String content = Files.readString(REGISTRATIONS_FILE, StandardCharsets.UTF_8);
             JsonObject data = GSON.fromJson(content, JsonObject.class);
 
+            if (data == null) {
+                LOGGER.warn("Dashboard registrations file is empty or invalid, starting fresh");
+                return;
+            }
+
             if (data.has("registrations")) {
                 data.getAsJsonArray("registrations").forEach(element -> {
                     JsonObject regObj = element.getAsJsonObject();

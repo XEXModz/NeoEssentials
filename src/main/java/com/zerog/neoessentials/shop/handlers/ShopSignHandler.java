@@ -52,6 +52,7 @@ public class ShopSignHandler {
 
     @SubscribeEvent
     public static void onSignPlaced(BlockEvent.EntityPlaceEvent event) {
+        if (!com.zerog.neoessentials.config.ConfigManager.isChestShopEnabled()) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!(event.getLevel() instanceof ServerLevel level)) return;
 
@@ -68,6 +69,7 @@ public class ShopSignHandler {
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post event) {
+        if (!com.zerog.neoessentials.config.ConfigManager.isChestShopEnabled()) return;
         if (++tickCounter % CHECK_INTERVAL_TICKS != 0) return;
 
         long now = System.currentTimeMillis();

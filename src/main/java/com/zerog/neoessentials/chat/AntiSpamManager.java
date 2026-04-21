@@ -291,7 +291,7 @@ public class AntiSpamManager {
 
     private boolean isAntiSpamEnabled() {
         try {
-            var chatConfig = com.zerog.neoessentials.config.ConfigManager.getInstance().getConfig("chat");
+            var chatConfig = getChatConfigSection();
             if (chatConfig.has("antiSpam")) {
                 return chatConfig.getAsJsonObject("antiSpam").get("enabled").getAsBoolean();
             }
@@ -303,7 +303,7 @@ public class AntiSpamManager {
 
     private boolean isSpamFilterEnabled() {
         try {
-            var chatConfig = com.zerog.neoessentials.config.ConfigManager.getInstance().getConfig("chat");
+            var chatConfig = getChatConfigSection();
             if (chatConfig.has("antiSpam")) {
                 var antiSpam = chatConfig.getAsJsonObject("antiSpam");
                 if (antiSpam.has("spamFilter")) {
@@ -318,7 +318,7 @@ public class AntiSpamManager {
 
     private boolean isRepeatFilterEnabled() {
         try {
-            var chatConfig = com.zerog.neoessentials.config.ConfigManager.getInstance().getConfig("chat");
+            var chatConfig = getChatConfigSection();
             if (chatConfig.has("antiSpam")) {
                 var antiSpam = chatConfig.getAsJsonObject("antiSpam");
                 if (antiSpam.has("repeatFilter")) {
@@ -333,7 +333,7 @@ public class AntiSpamManager {
 
     private boolean isLinkFilterEnabled() {
         try {
-            var chatConfig = com.zerog.neoessentials.config.ConfigManager.getInstance().getConfig("chat");
+            var chatConfig = getChatConfigSection();
             if (chatConfig.has("antiSpam")) {
                 var antiSpam = chatConfig.getAsJsonObject("antiSpam");
                 if (antiSpam.has("linkFilter")) {
@@ -348,7 +348,7 @@ public class AntiSpamManager {
 
     private boolean isCapsFilterEnabled() {
         try {
-            var chatConfig = com.zerog.neoessentials.config.ConfigManager.getInstance().getConfig("chat");
+            var chatConfig = getChatConfigSection();
             if (chatConfig.has("antiSpam")) {
                 var antiSpam = chatConfig.getAsJsonObject("antiSpam");
                 if (antiSpam.has("capsFilter")) {
@@ -371,27 +371,47 @@ public class AntiSpamManager {
     }
 
     private JsonObject getSpamFilterConfig() {
-        var chatConfig = com.zerog.neoessentials.config.ConfigManager.getInstance().getConfig("chat");
+        var chatConfig = getChatConfigSection();
         var antiSpam = getSafeJsonObject(chatConfig, "antiSpam");
         return getSafeJsonObject(antiSpam, "spamFilter");
     }
 
     private JsonObject getRepeatFilterConfig() {
-        var chatConfig = com.zerog.neoessentials.config.ConfigManager.getInstance().getConfig("chat");
+        var chatConfig = getChatConfigSection();
         var antiSpam = getSafeJsonObject(chatConfig, "antiSpam");
         return getSafeJsonObject(antiSpam, "repeatFilter");
     }
 
     private JsonObject getLinkFilterConfig() {
-        var chatConfig = com.zerog.neoessentials.config.ConfigManager.getInstance().getConfig("chat");
+        var chatConfig = getChatConfigSection();
         var antiSpam = getSafeJsonObject(chatConfig, "antiSpam");
         return getSafeJsonObject(antiSpam, "linkFilter");
     }
 
     private JsonObject getCapsFilterConfig() {
-        var chatConfig = com.zerog.neoessentials.config.ConfigManager.getInstance().getConfig("chat");
+        var chatConfig = getChatConfigSection();
         var antiSpam = getSafeJsonObject(chatConfig, "antiSpam");
         return getSafeJsonObject(antiSpam, "capsFilter");
+    }
+
+    /**
+     * Get the chat config section, handling both monolithic and split config formats.
+     * Split config: chat.json has { "chat": { ... } } — need to unwrap.
+     * Monolithic config: config.json has { "chat": { ... } } — same unwrap.
+     */
+    private JsonObject getChatConfigSection() {
+        try {
+            var rawConfig = com.zerog.neoessentials.config.ConfigManager.getInstance().getConfig("chat");
+            if (rawConfig == null) return null;
+            // If the config has a "chat" wrapper key, unwrap it
+            if (rawConfig.has("chat")) {
+                return rawConfig.getAsJsonObject("chat");
+            }
+            // Already unwrapped (antiSpam is at root level)
+            return rawConfig;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**

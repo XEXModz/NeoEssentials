@@ -27,7 +27,7 @@ public class TranslationHandler implements HttpHandler {
     private final Gson gson = new Gson();
     
     // Store user language preferences by session
-    private final Map<String, String> userLanguages = new HashMap<>();
+    private final Map<String, String> userLanguages = new java.util.concurrent.ConcurrentHashMap<>();
     
     @Override
     public void handle(HttpExchange exchange) throws IOException {

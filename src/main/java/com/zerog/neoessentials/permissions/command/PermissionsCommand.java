@@ -71,7 +71,7 @@ public class PermissionsCommand {
                                 if (!groups.isEmpty()) {
                                     return SharedSuggestionProvider.suggest(groups, builder);
                                 }
-                            } catch (Exception e) {}
+                            } catch (Exception e) { LOGGER.error("Error in permission command suggestion: {}", e.getMessage()); }
                             return SharedSuggestionProvider.suggest(
                                 java.util.Arrays.asList("admin", "moderator", "player", "vip", "default"),
                                 builder);
@@ -105,7 +105,7 @@ public class PermissionsCommand {
                                 if (!groups.isEmpty()) {
                                     return SharedSuggestionProvider.suggest(groups, builder);
                                 }
-                            } catch (Exception e) {}
+                            } catch (Exception e) { LOGGER.error("Error in permission command suggestion: {}", e.getMessage()); }
                             return SharedSuggestionProvider.suggest(
                                 java.util.Arrays.asList("admin", "moderator", "player", "vip", "default"),
                                 builder);
@@ -130,7 +130,7 @@ public class PermissionsCommand {
                                 if (!groups.isEmpty()) {
                                     return SharedSuggestionProvider.suggest(groups, builder);
                                 }
-                            } catch (Exception e) {}
+                            } catch (Exception e) { LOGGER.error("Error in permission command suggestion: {}", e.getMessage()); }
                             return SharedSuggestionProvider.suggest(
                                 java.util.Arrays.asList("admin", "moderator", "player", "vip", "default"),
                                 builder);
@@ -147,7 +147,7 @@ public class PermissionsCommand {
                                 if (!groups.isEmpty()) {
                                     return SharedSuggestionProvider.suggest(groups, builder);
                                 }
-                            } catch (Exception e) {}
+                            } catch (Exception e) { LOGGER.error("Error in permission command suggestion: {}", e.getMessage()); }
                             return SharedSuggestionProvider.suggest(
                                 java.util.Arrays.asList("admin", "moderator", "player", "vip", "default"),
                                 builder);
@@ -165,7 +165,7 @@ public class PermissionsCommand {
                                 if (!groups.isEmpty()) {
                                     return SharedSuggestionProvider.suggest(groups, builder);
                                 }
-                            } catch (Exception e) {}
+                            } catch (Exception e) { LOGGER.error("Error in permission command suggestion: {}", e.getMessage()); }
                             return SharedSuggestionProvider.suggest(
                                 java.util.Arrays.asList("admin", "moderator", "player", "vip", "default"),
                                 builder);
@@ -268,7 +268,7 @@ public class PermissionsCommand {
                                         if (!groups.isEmpty()) {
                                             return SharedSuggestionProvider.suggest(groups, builder);
                                         }
-                                    } catch (Exception e) {}
+                                    } catch (Exception e) { LOGGER.error("Error in permission command suggestion: {}", e.getMessage()); }
                                     return SharedSuggestionProvider.suggest(
                                         java.util.Arrays.asList("admin", "moderator", "player", "vip", "default"),
                                         builder);
@@ -283,7 +283,7 @@ public class PermissionsCommand {
                                         if (group != null && !group.getInherits().isEmpty()) {
                                             return SharedSuggestionProvider.suggest(group.getInherits(), builder);
                                         }
-                                    } catch (Exception e) {}
+                                    } catch (Exception e) { LOGGER.error("Error in permission command suggestion: {}", e.getMessage()); }
                                     return SharedSuggestionProvider.suggest(
                                         java.util.Arrays.asList("admin", "moderator", "player", "vip", "default"),
                                         builder);

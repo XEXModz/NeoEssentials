@@ -130,8 +130,10 @@ public class AuthenticationHandler implements HttpHandler {
                 LOGGER.debug("Password changed for user '{}': requiresPasswordChange={}, isTempPassword={}",
                     user.getUsername(), user.requiresPasswordChange(), user.isTempPassword());
                 Session sessionObj = authManager.validateSession(sessionId);
+                if (com.zerog.neoessentials.config.ConfigManager.isDebugModeEnabled()) {
                 LOGGER.debug("Session state after password change: sessionId={}, active={}, requiresPasswordChange={}",
                     sessionId, sessionObj != null ? sessionObj.isActive() : "null", sessionObj != null ? sessionObj.requiresPasswordChange() : "null");
+                }
             }
             // Invalidate the current session after password change
             authManager.logout(sessionId);

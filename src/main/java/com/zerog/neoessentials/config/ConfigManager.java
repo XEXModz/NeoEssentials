@@ -1524,6 +1524,21 @@ public class ConfigManager {
     }
 
     /**
+     * Returns true if ChestShop system is enabled (modules.chestShopEnabled).
+     * Defaults to true if not set for backwards compatibility.
+     */
+    public static boolean isChestShopEnabled() {
+        JsonObject config = getInstance().getConfig(MAIN_CONFIG);
+        if (config.has("modules")) {
+            JsonObject modules = config.getAsJsonObject("modules");
+            if (modules.has("chestShopEnabled")) {
+                return modules.get("chestShopEnabled").getAsBoolean();
+            }
+        }
+        return true;
+    }
+
+    /**
      * Returns the economy starting balance from economy.json (startingBalance).
      * Defaults to 100.0 if not set.
      */

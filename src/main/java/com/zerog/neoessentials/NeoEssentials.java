@@ -30,7 +30,7 @@ public class NeoEssentials {
     private static final Logger LOGGER = LoggerFactory.getLogger(NeoEssentials.class);
     
     // Build and version information
-    private static final String MOD_VERSION = "1.0.2.5";
+    private static final String MOD_VERSION = "1.1.2-beta";
     private static final String MOD_NAME = "NeoEssentials";
     private static final String BUILD_NUMBER = readBuildNumber();
     private static final String MINECRAFT_VERSION = "1.21.1-1.21.10";
@@ -206,6 +206,7 @@ public class NeoEssentials {
             }
 
             // Initialize ChestShop system
+            if (com.zerog.neoessentials.config.ConfigManager.isChestShopEnabled()) {
             try {
                 LOGGER.info("⚙ Initializing ChestShop system...");
                 com.zerog.neoessentials.shop.ShopManager.getInstance().initialize();
@@ -213,6 +214,9 @@ public class NeoEssentials {
                     com.zerog.neoessentials.shop.ShopManager.getInstance().getShopCount());
             } catch (Exception e) {
                 LOGGER.error("✗ ChestShop system failed to initialize: {}", e.getMessage(), e);
+            }
+            } else {
+                LOGGER.info("⚙ ChestShop system disabled in config");
             }
 
             // Initialize custom language system
@@ -901,9 +905,11 @@ public class NeoEssentials {
         com.zerog.neoessentials.vault.command.VaultCommand.register(dispatcher);
 
         // ========== CHEST SHOP COMMANDS ==========
+        if (com.zerog.neoessentials.config.ConfigManager.isChestShopEnabled()) {
         registry.registerCommand("chestshop", "Sign-based chest shop system");
         registry.registerCommand("cshop", "Sign-based chest shop (alias)");
         com.zerog.neoessentials.shop.commands.ShopCommand.register(dispatcher);
+        }
     }
         /*
          * All command registration and related logic that was previously outside of methods has been moved here as a block comment.

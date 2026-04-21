@@ -15,7 +15,7 @@ public class BalanceCommand {
             net.minecraft.commands.Commands.literal("balance")
                 .executes(ctx -> execute(ctx))
                 .then(net.minecraft.commands.Commands.argument("player", StringArgumentType.word())
-                    .requires(src -> src.hasPermission(2) || com.zerog.neoessentials.api.permissions.PermissionAPI.hasPermission(src.getPlayer() != null ? src.getPlayer().getUUID() : null, "neoessentials.economy.balance.others"))
+                    .requires(src -> src.hasPermission(2) || (src.getPlayer() != null && com.zerog.neoessentials.api.permissions.PermissionAPI.hasPermission(src.getPlayer().getUUID(), "neoessentials.economy.balance.others")))
                     .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
                         ctx.getSource().getServer().getPlayerList().getPlayers().stream()
                             .map(p -> p.getGameProfile().getName()),
@@ -59,16 +59,14 @@ public class BalanceCommand {
 
     private static int executeOther(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
         if (!EconomyManager.getInstance().isEnabled()) return 0;
-        ServerPlayer sender = null;
-        try {
-            sender = ctx.getSource().getPlayerOrException();
-        } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
-            ctx.getSource().sendFailure(MessageUtil.error("commands.neoessentials.balance.player_not_found"));
-            return 0;
-        }
-        if (!com.zerog.neoessentials.api.permissions.PermissionAPI.hasPermission(sender.getUUID(), "neoessentials.economy.balance.others")) {
-            ctx.getSource().sendFailure(MessageUtil.error("commands.neoessentials.no_permission"));
-            return 0;
+        // Console can check other players' balances (hasPermission(2) check in requires)
+        // Players need the permission
+        if (ctx.getSource().getPlayer() != null) {
+            ServerPlayer sender = ctx.getSource().getPlayer();
+            if (!com.zerog.neoessentials.api.permissions.PermissionAPI.hasPermission(sender.getUUID(), "neoessentials.economy.balance.others")) {
+                ctx.getSource().sendFailure(MessageUtil.error("commands.neoessentials.no_permission"));
+                return 0;
+            }
         }
         String playerName = StringArgumentType.getString(ctx, "player");
         java.util.Optional<UUID> uuidOpt = com.zerog.neoessentials.economy.EconomyPlayerUtil.getUUIDByName(ctx.getSource().getServer(), playerName);

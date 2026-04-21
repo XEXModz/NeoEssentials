@@ -36,6 +36,7 @@ public class ShopInteractHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onRightClick(PlayerInteractEvent.RightClickBlock event) {
+        if (!com.zerog.neoessentials.config.ConfigManager.isChestShopEnabled()) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (event.getHand() != InteractionHand.MAIN_HAND) return;
 
@@ -103,6 +104,7 @@ public class ShopInteractHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLeftClick(PlayerInteractEvent.LeftClickBlock event) {
+        if (!com.zerog.neoessentials.config.ConfigManager.isChestShopEnabled()) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
 
         ServerLevel level = player.serverLevel();
@@ -142,6 +144,7 @@ public class ShopInteractHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
+        if (!com.zerog.neoessentials.config.ConfigManager.isChestShopEnabled()) return;
         if (!(event.getPlayer() instanceof ServerPlayer player)) return;
         if (!(event.getLevel() instanceof ServerLevel level)) return;
 

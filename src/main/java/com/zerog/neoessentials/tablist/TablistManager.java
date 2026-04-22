@@ -169,10 +169,11 @@ public class TablistManager {
         }
     }
 
-    /** Send header/footer to a single player. */
+    /** Send header/footer to a single player and update all player row display names. */
     public void updatePlayer(ServerPlayer player, MinecraftServer server) {
         if (!enabled) return;
         try {
+            // Send header/footer
             String header = buildHeader(player, server);
             String footer = buildFooter(player, server);
             ClientboundTabListPacket packet = new ClientboundTabListPacket(
@@ -180,8 +181,79 @@ public class TablistManager {
                 Component.literal(footer)
             );
             player.connection.send(packet);
+
+            // Update all player row display names for this viewer
+            updatePlayerRows(player, server);
         } catch (Exception e) {
             LOGGER.debug("Failed to send tablist packet to {}: {}", player.getName().getString(), e.getMessage());
+        }
+    }
+
+    /**
+     * Update all player row display names in the TAB list.
+     * Uses Minecraft's Scoreboard Team system to set [prefix]PlayerName pingms.
+     * Teams are the standard way to format player names in the TAB list.
+     */
+    private void updatePlayerRows(ServerPlayer viewer, MinecraftServer server) {
+        try {
+            var scoreboard = server.getScoreboard();
+
+            for (ServerPlayer target : server.getPlayerList().getPlayers()) {
+                // Skip vanished players for non-staff
+                if (isVanishedFromPlayer(target, viewer)) continue;
+
+                String prefix = getPermissionPrefix(target);
+                String group = getPermissionGroup(target);
+                int ping = target.connection.latency();
+
+                // Color the ping based on value
+                String pingColor;
+                if (ping < 50) pingColor = "§a";
+                else if (ping < 100) pingColor = "§e";
+                else if (ping < 200) pingColor = "§6";
+                else pingColor = "§c";
+
+                // Build team prefix with brackets
+                // - Color-only prefix (like §7) → §7[player]§r
+                // - Text prefix without brackets (like Owner) → [Owner]§r
+                // - Text prefix with brackets (like §2[Mod] ) → §2[Mod] §r (as-is)
+                String teamPrefix;
+                if (prefix != null && !prefix.isEmpty()) {
+                    String stripped = prefix.replaceAll("§[0-9a-fk-or]", "").trim();
+                    if (stripped.isEmpty()) {
+                        // Just a color code — show [player] in that color
+                        teamPrefix = prefix + "[player]§r ";
+                    } else if (stripped.contains("[") && stripped.contains("]")) {
+                        // Already has brackets — use as-is
+                        teamPrefix = prefix + "§r";
+                    } else {
+                        // Has text but no brackets — extract color and wrap text
+                        String colorCode = prefix.substring(0, prefix.indexOf(stripped));
+                        teamPrefix = colorCode + "[" + stripped + "]§r ";
+                    }
+                } else {
+                    String groupColor = groupColors.getOrDefault(group, "§7");
+                    teamPrefix = groupColor + "[player]§r ";
+                }
+
+                // Create or get the team for this group
+                String teamName = "ne_" + group;
+                var team = scoreboard.getPlayerTeam(teamName);
+                if (team == null) {
+                    team = scoreboard.addPlayerTeam(teamName);
+                }
+
+                // Update prefix and ping suffix
+                team.setPlayerPrefix(Component.literal(teamPrefix));
+                team.setPlayerSuffix(Component.literal(" " + pingColor + ping + "ms"));
+
+                // Add the player to the team if not already in it
+                if (!team.getPlayers().contains(target.getScoreboardName())) {
+                    scoreboard.addPlayerToTeam(target.getScoreboardName(), team);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Failed to update player rows: {}", e.getMessage());
         }
     }
 

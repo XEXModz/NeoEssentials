@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * WebSocket server for real-time dashboard updates.
@@ -28,6 +29,11 @@ public class DashboardWebSocketServer extends WebSocketServer {
     private static final long MESSAGE_COOLDOWN_MS = 100;
 
     private static DashboardWebSocketServer INSTANCE;
+
+    // Tracks whether start() has been called on this instance.
+    // The underlying java-websocket WebSocketServer can only be started once;
+    // calling start() a second time throws IllegalStateException.
+    private final AtomicBoolean started = new AtomicBoolean(false);
 
     // Per-connection state
     private final Map<WebSocket, Set<String>> clientSubscriptions = new ConcurrentHashMap<>();
@@ -52,6 +58,46 @@ public class DashboardWebSocketServer extends WebSocketServer {
             throw new IllegalStateException("WebSocket server not initialized. Call getInstance(port) first.");
         }
         return INSTANCE;
+    }
+
+    /**
+     * Starts the WebSocket server if it has not already been started.
+     * Safe to call multiple times — subsequent calls are no-ops.
+     * @return true if this call actually started the server, false if it was already started
+     */
+    public boolean startIfNotStarted() {
+        if (started.compareAndSet(false, true)) {
+            start();
+            return true;
+        }
+        LOGGER.debug("WebSocket server start requested but already started; ignoring");
+        return false;
+    }
+
+    /**
+     * Returns true if start() has been invoked on this instance.
+     */
+    public boolean isStarted() {
+        return started.get();
+    }
+
+    /**
+     * Stops the WebSocket server and clears the singleton INSTANCE so that a
+     * fresh instance can be created on next start. This is required because
+     * the underlying WebSocketServer cannot be restarted once stopped.
+     * @param timeoutMillis timeout passed to the underlying stop() call
+     */
+    public static synchronized void shutdownAndReset(int timeoutMillis) {
+        if (INSTANCE == null) {
+            return;
+        }
+        try {
+            INSTANCE.stop(timeoutMillis);
+        } catch (Exception e) {
+            LOGGER.warn("Error stopping WebSocket server during reset: {}", e.getMessage());
+        } finally {
+            INSTANCE = null;
+        }
     }
 
     // ── WebSocketServer lifecycle ────────────────────────────────────────────

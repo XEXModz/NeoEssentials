@@ -242,7 +242,7 @@
       "restrictedConfigPaths_comment": "List of config file paths that cannot be edited via web dashboard",
   "enableRateLimiting": true,
   "enableRateLimiting_comment": "Enable per-IP rate limiting for dashboard API requests.",
-  "maxRequestsPerMinute": 60,
+  "maxRequestsPerMinute": 200,
   "maxRequestsPerMinute_comment": "Maximum API requests per minute per IP address when rate limiting is enabled."
     },
     "uiSettings": {

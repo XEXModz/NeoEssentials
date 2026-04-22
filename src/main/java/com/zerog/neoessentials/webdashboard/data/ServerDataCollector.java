@@ -37,7 +37,7 @@ public class ServerDataCollector {
      * Endpoint: GET /api/server/profile
      */
     public JsonObject getServerProfile() {
-        LOGGER.info("=== Collecting Server Profile Data ===");
+        LOGGER.debug("=== Collecting Server Profile Data ===");
         JsonObject profile = new JsonObject();
         
         try {
@@ -83,7 +83,7 @@ public class ServerDataCollector {
                 profile.add("mods", mods);
                 profile.addProperty("modCount", mods.size());
                 profile.addProperty("modsLoaded", mods.size()); // For frontend compatibility
-                LOGGER.info("Successfully collected profile data: {} mods loaded", mods.size());
+                LOGGER.debug("Successfully collected profile data: {} mods loaded", mods.size());
             } catch (Exception e) {
                 LOGGER.error("Error collecting mod list", e);
                 profile.add("mods", new JsonArray());
@@ -91,7 +91,7 @@ public class ServerDataCollector {
                 profile.addProperty("modsLoaded", 0);
             }
             
-            LOGGER.info("=== Server Profile Data Collection Complete ===");
+            LOGGER.debug("=== Server Profile Data Collection Complete ===");
             return profile;
         } catch (Exception e) {
             LOGGER.error("Critical error collecting server profile", e);
@@ -193,7 +193,7 @@ public class ServerDataCollector {
             stats.addProperty("totalLoadedChunks", totalLoadedChunks[0]);
             LOGGER.debug("Total chunks loaded: {}", totalLoadedChunks[0]);
 
-            LOGGER.info("=== Server Statistics Collection Complete ===");
+            LOGGER.debug("=== Server Statistics Collection Complete ===");
             return stats;
         } catch (Exception e) {
             LOGGER.error("Error collecting server statistics", e);
@@ -211,7 +211,7 @@ public class ServerDataCollector {
      * Endpoint: GET /api/server/status
      */
     public JsonObject getServerStatus() {
-        LOGGER.info("=== Collecting Server Status ===");
+        LOGGER.debug("=== Collecting Server Status ===");
         JsonObject status = new JsonObject();
         
         try {
@@ -243,7 +243,7 @@ public class ServerDataCollector {
             status.addProperty("health", health);
             LOGGER.debug("Health: {}", health);
 
-            LOGGER.info("=== Server Status Collection Complete ===");
+            LOGGER.debug("=== Server Status Collection Complete ===");
             return status;
         } catch (Exception e) {
             LOGGER.error("Error collecting server status", e);
@@ -301,20 +301,20 @@ public class ServerDataCollector {
      * Endpoint: GET /api/server/worlds
      */
     public JsonObject getServerWorlds() {
-        LOGGER.info("=== Starting getServerWorlds data collection ===");
+        LOGGER.debug("=== Starting getServerWorlds data collection ===");
         JsonObject worlds = new JsonObject();
         JsonArray worldsList = new JsonArray();
         
         // Log total players first
-        LOGGER.info("Total players online: {}", server.getPlayerList().getPlayers().size());
+        LOGGER.debug("Total players online: {}", server.getPlayerList().getPlayers().size());
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
-                LOGGER.info("  - Player: {}, Dimension: {}", p.getName().getString(), p.level().dimension().location());
+                LOGGER.debug("  - Player: {}, Dimension: {}", p.getName().getString(), p.level().dimension().location());
         }
         
         server.getAllLevels().forEach(level -> {
             JsonObject world = new JsonObject();
             String dimensionKey = level.dimension().location().toString();
-            LOGGER.info("Processing dimension: {}", dimensionKey);
+            LOGGER.debug("Processing dimension: {}", dimensionKey);
             
             world.addProperty("dimension", dimensionKey);
             world.addProperty("name", getDimensionDisplayName(dimensionKey));
@@ -325,14 +325,14 @@ public class ServerDataCollector {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 String playerDim = player.level().dimension().location().toString();
                 boolean matches = playerDim.equals(dimensionKey);
-                LOGGER.info("  Checking player {}: dimension={}, matches={}", 
+                LOGGER.debug("  Checking player {}: dimension={}, matches={}", 
                     player.getName().getString(), playerDim, matches);
                 if (matches) {
                     playersInDimension++;
                 }
             }
             world.addProperty("playersInWorld", playersInDimension);
-            LOGGER.info("  Final player count for {}: {}", dimensionKey, playersInDimension);
+            LOGGER.debug("  Final player count for {}: {}", dimensionKey, playersInDimension);
             
             // Count ACTUAL loaded chunks (not cached chunks)
             int loadedChunks;
@@ -342,7 +342,7 @@ public class ServerDataCollector {
                 // NOT chunkMap.size() which includes all cached/unloaded chunks
                 loadedChunks = chunkSource.getLoadedChunksCount();
 
-                LOGGER.info("  Loaded chunks for {}: {}", dimensionKey, loadedChunks);
+                LOGGER.debug("  Loaded chunks for {}: {}", dimensionKey, loadedChunks);
             } catch (Exception e) {
                 LOGGER.warn("  Failed to count chunks for {}: {}", dimensionKey, e.getMessage());
                 loadedChunks = 0;
@@ -357,7 +357,7 @@ public class ServerDataCollector {
                 for (@SuppressWarnings("unused") var entity : entities) {
                     entityCount++;
                 }
-                LOGGER.info("  Total entities in {}: {}", dimensionKey, entityCount);
+                LOGGER.debug("  Total entities in {}: {}", dimensionKey, entityCount);
             } catch (Exception e) {
                 LOGGER.warn("  Failed to count entities for {}: {}", dimensionKey, e.getMessage());
                 entityCount = 0;
@@ -376,13 +376,13 @@ public class ServerDataCollector {
             world.add("spawn", spawn);
             
             worldsList.add(world);
-            LOGGER.info("Completed processing dimension: {}", dimensionKey);
+            LOGGER.debug("Completed processing dimension: {}", dimensionKey);
         });
         
         worlds.add("worlds", worldsList);
         worlds.addProperty("count", worldsList.size());
         
-        LOGGER.info("=== Completed getServerWorlds data collection ===");
+        LOGGER.debug("=== Completed getServerWorlds data collection ===");
         return worlds;
     }
     

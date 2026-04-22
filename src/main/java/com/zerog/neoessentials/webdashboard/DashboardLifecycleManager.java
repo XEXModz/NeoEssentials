@@ -52,8 +52,11 @@ public class DashboardLifecycleManager {
             try {
                 int wsPort = ConfigManager.getInstance().getWebDashboardWebSocketPort();
                 DashboardWebSocketServer wsServer = DashboardWebSocketServer.getInstance(wsPort);
-                wsServer.start();
-                LOGGER.info("Dashboard WebSocket server started on port {}", wsPort);
+                if (wsServer.startIfNotStarted()) {
+                    LOGGER.info("Dashboard WebSocket server started on port {}", wsPort);
+                } else {
+                    LOGGER.info("Dashboard WebSocket server already running on port {}", wsPort);
+                }
             } catch (Exception wsEx) {
                 LOGGER.error("Failed to start WebSocket server: {}", wsEx.getMessage(), wsEx);
             }
@@ -79,9 +82,9 @@ public class DashboardLifecycleManager {
                 long dashboardStopTime = System.currentTimeMillis() - startTime;
                 LOGGER.info("Dashboard API stopped in {}ms", dashboardStopTime);
 
-                // Stop WebSocket server
+                // Stop WebSocket server (and reset singleton so it can be restarted)
                 try {
-                    DashboardWebSocketServer.getInstance().stop(2000);
+                    DashboardWebSocketServer.shutdownAndReset(2000);
                     LOGGER.info("Dashboard WebSocket server stopped");
                 } catch (Exception wsEx) {
                     LOGGER.warn("Error stopping WebSocket server: {}", wsEx.getMessage());
@@ -121,7 +124,7 @@ public class DashboardLifecycleManager {
             // Start WebSocket server
             try {
                 int wsPort = ConfigManager.getInstance().getWebDashboardWebSocketPort();
-                DashboardWebSocketServer.getInstance(wsPort).start();
+                DashboardWebSocketServer.getInstance(wsPort).startIfNotStarted();
             } catch (Exception wsEx) {
                 LOGGER.error("Failed to start WebSocket server (manual): {}", wsEx.getMessage(), wsEx);
             }
@@ -146,9 +149,9 @@ public class DashboardLifecycleManager {
             // Stop Dashboard API
             DashboardAPI.getInstance().stop();
 
-            // Stop WebSocket server
+            // Stop WebSocket server (and reset singleton so it can be restarted)
             try {
-                DashboardWebSocketServer.getInstance().stop(2000);
+                DashboardWebSocketServer.shutdownAndReset(2000);
             } catch (Exception wsEx) {
                 LOGGER.warn("Error stopping WebSocket server (manual): {}", wsEx.getMessage());
             }

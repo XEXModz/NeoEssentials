@@ -2262,7 +2262,7 @@ public class ConfigManager {
 
     /**
      * Returns the max requests per minute per IP for the dashboard API.
-     * Reads webDashboard.securitySettings.maxRequestsPerMinute. Defaults to 60.
+     * Reads webDashboard.securitySettings.maxRequestsPerMinute. Defaults to 200.
      */
     public int getDashboardMaxRequestsPerMinute() {
         JsonObject config = getConfig(MAIN_CONFIG);
@@ -2274,11 +2274,11 @@ public class ConfigManager {
                 else if (wd.has("security")) sec = wd.getAsJsonObject("security");
                 if (sec != null && sec.has("maxRequestsPerMinute")) {
                     int val = sec.get("maxRequestsPerMinute").getAsInt();
-                    return val > 0 ? val : 60;
+                    return val > 0 ? val : 200;
                 }
             }
         } catch (Exception ignored) {}
-        return 60;
+        return 200;
     }
 
     /**

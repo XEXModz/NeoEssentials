@@ -712,7 +712,7 @@ public class PlayerDataCollector {
         JsonArray onlinePlayers = new JsonArray();
         JsonArray offlinePlayers = new JsonArray();
         
-        LOGGER.info("=== Starting getOnlinePlayers data collection ===");
+        LOGGER.debug("=== Starting getOnlinePlayers data collection ===");
         
         // Get online players
         List<ServerPlayer> online = server.getPlayerList().getPlayers();
@@ -732,7 +732,7 @@ public class PlayerDataCollector {
             onlineUsernames.add(player.getName().getString());
         });
         
-        LOGGER.info("Found {} online players", onlinePlayers.size());
+        LOGGER.debug("Found {} online players", onlinePlayers.size());
         
         // Get offline players from playerdata directory
         try {
@@ -740,12 +740,12 @@ public class PlayerDataCollector {
             net.minecraft.server.level.ServerLevel overworld = server.overworld();
 
             java.nio.file.Path playerDataDir = overworld.getServer().getWorldPath(net.minecraft.world.level.storage.LevelResource.PLAYER_DATA_DIR);
-            LOGGER.info("Looking for offline players in: {}", playerDataDir);
+            LOGGER.debug("Looking for offline players in: {}", playerDataDir);
             
             if (java.nio.file.Files.exists(playerDataDir)) {
                 net.minecraft.server.players.GameProfileCache cache = server.getProfileCache();
                 
-                LOGGER.info("Player data directory exists, cache available: {}", (cache != null));
+                LOGGER.debug("Player data directory exists, cache available: {}", (cache != null));
                 
                 // Limit to last 50 offline players to avoid performance issues
                 int maxOffline = 50;
@@ -820,7 +820,7 @@ public class PlayerDataCollector {
                     LOGGER.warn("Error reading player data directory: {}", ioEx.getMessage());
                 }
 
-                LOGGER.info("Found {} offline players", offlinePlayers.size());
+                LOGGER.debug("Found {} offline players", offlinePlayers.size());
             } else {
                 LOGGER.warn("Player data directory does not exist: {}", playerDataDir);
             }
@@ -835,7 +835,7 @@ public class PlayerDataCollector {
         response.addProperty("offlineCount", offlinePlayers.size());
         response.addProperty("max", server.getMaxPlayers());
         
-        LOGGER.info("=== Completed getOnlinePlayers: {} online, {} offline ===", 
+        LOGGER.debug("=== Completed getOnlinePlayers: {} online, {} offline ===", 
             onlinePlayers.size(), offlinePlayers.size());
         
         return response;

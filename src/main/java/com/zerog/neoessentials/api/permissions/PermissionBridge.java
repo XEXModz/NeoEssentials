@@ -3,10 +3,12 @@ package com.zerog.neoessentials.api.permissions;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import com.zerog.neoessentials.util.MessageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,16 @@ import java.util.HashSet;
  */
 public class PermissionBridge {
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionBridge.class);
+
+    /**
+     * Creates a styled chat component using the Minecraft ChatFormatting API
+     * instead of legacy § color codes. Use this for all in-game messages
+     * in this class to keep styling type-safe and consistent with the rest
+     * of the mod.
+     */
+    private static MutableComponent styled(String text, ChatFormatting color) {
+        return Component.literal(text).withStyle(color);
+    }
     
     /**
      * Register permission-related commands
@@ -378,7 +390,11 @@ public class PermissionBridge {
             .sorted()
             .forEach(perm -> {
                 PermissionRegistry.PermissionInfo info = registry.getPermissionInfo(perm);
-                String defaultStr = info.getDefaultValue() ? "§a✓" : "§c✗";
+                // Styled check/cross using ChatFormatting color codes (legacy § still allowed
+                // inside MessageUtil template strings for i18n compatibility)
+                String defaultStr = info.getDefaultValue()
+                    ? ChatFormatting.GREEN + "\u2713"
+                    : ChatFormatting.RED + "\u2717";
                 source.sendSuccess(() -> MessageUtil.info("commands.neoessentials.permissions.category.permission_details", perm, defaultStr, info.getDescription()), false);
             });
     }
@@ -667,37 +683,37 @@ public class PermissionBridge {
      */
     private static void showPermissionsEXHelp(CommandSourceStack source) {
         source.sendSuccess(() -> MessageUtil.success("commands.neoessentials.permissions.help.pex.title"), false);
-        source.sendSuccess(() -> Component.literal("§eThe issue you're experiencing is that PermissionsEX only shows"), false);
-        source.sendSuccess(() -> Component.literal("§ewildcard permissions (*.teleport.*) in tab completion, not"), false);
-        source.sendSuccess(() -> Component.literal("§eindividual permissions. Here's how to fix it:"), false);
+        source.sendSuccess(() -> styled("The issue you're experiencing is that PermissionsEX only shows", ChatFormatting.YELLOW), false);
+        source.sendSuccess(() -> styled("wildcard permissions (*.teleport.*) in tab completion, not", ChatFormatting.YELLOW), false);
+        source.sendSuccess(() -> styled("individual permissions. Here's how to fix it:", ChatFormatting.YELLOW), false);
         source.sendSuccess(() -> Component.literal(""), false);
-        source.sendSuccess(() -> Component.literal("§a1. Export permissions for PEX:"), false);
-        source.sendSuccess(() -> Component.literal("§f   /neoessentials-permissions export pex"), false);
+        source.sendSuccess(() -> styled("1. Export permissions for PEX:", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("   /neoessentials-permissions export pex", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
-        source.sendSuccess(() -> Component.literal("§a2. List all individual permissions:"), false);
-        source.sendSuccess(() -> Component.literal("§f   /neoessentials-permissions list-all"), false);
+        source.sendSuccess(() -> styled("2. List all individual permissions:", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("   /neoessentials-permissions list-all", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
-        source.sendSuccess(() -> Component.literal("§a3. Use the exported file or copy permissions manually"), false);
-        source.sendSuccess(() -> Component.literal("§f   Check: neoessentials-permissions.pex"), false);
+        source.sendSuccess(() -> styled("3. Use the exported file or copy permissions manually", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("   Check: neoessentials-permissions.pex", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
-        source.sendSuccess(() -> Component.literal("§a4. PermissionsEX Group Commands:"), false);
-        source.sendSuccess(() -> Component.literal("§f   /pex group admin add neoessentials.*"), false);
-        source.sendSuccess(() -> Component.literal("§f   /pex group moderator add neoessentials.teleport.*"), false);
-        source.sendSuccess(() -> Component.literal("§f   /pex group player add neoessentials.teleport.home.home"), false);
-        source.sendSuccess(() -> Component.literal("§f   /pex group player add neoessentials.economy.balance"), false);
+        source.sendSuccess(() -> styled("4. PermissionsEX Group Commands:", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("   /pex group admin add neoessentials.*", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("   /pex group moderator add neoessentials.teleport.*", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("   /pex group player add neoessentials.teleport.home.home", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("   /pex group player add neoessentials.economy.balance", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
-        source.sendSuccess(() -> Component.literal("§a5. PermissionsEX User Commands:"), false);
-        source.sendSuccess(() -> Component.literal("§f   /pex user [username] add neoessentials.teleport.admin.tp"), false);
-        source.sendSuccess(() -> Component.literal("§f   /pex user [username] add neoessentials.kits.starter"), false);
+        source.sendSuccess(() -> styled("5. PermissionsEX User Commands:", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("   /pex user [username] add neoessentials.teleport.admin.tp", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("   /pex user [username] add neoessentials.kits.starter", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
-        source.sendSuccess(() -> Component.literal("§c6. Typical issue: PermissionsEX tab completion only shows"), false);
-        source.sendSuccess(() -> Component.literal("§c   permissions it knows about. Individual permissions need"), false);
-        source.sendSuccess(() -> Component.literal("§c   to be registered with the permission system first."), false);
+        source.sendSuccess(() -> styled("6. Typical issue: PermissionsEX tab completion only shows", ChatFormatting.RED), false);
+        source.sendSuccess(() -> styled("   permissions it knows about. Individual permissions need", ChatFormatting.RED), false);
+        source.sendSuccess(() -> styled("   to be registered with the permission system first.", ChatFormatting.RED), false);
         source.sendSuccess(() -> Component.literal(""), false);
-        source.sendSuccess(() -> Component.literal("§b7. Recommended Permission Groups:"), false);
-        source.sendSuccess(() -> Component.literal("§f   - Admin: neoessentials.*"), false);
-        source.sendSuccess(() -> Component.literal("§f   - Moderator: neoessentials.teleport.*, neoessentials.chat.*"), false);
-        source.sendSuccess(() -> Component.literal("§f   - Player: neoessentials.teleport.home.*, neoessentials.economy.*"), false);
+        source.sendSuccess(() -> styled("7. Recommended Permission Groups:", ChatFormatting.AQUA), false);
+        source.sendSuccess(() -> styled("   - Admin: neoessentials.*", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("   - Moderator: neoessentials.teleport.*, neoessentials.chat.*", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("   - Player: neoessentials.teleport.home.*, neoessentials.economy.*", ChatFormatting.WHITE), false);
     }
     
     /**
@@ -714,9 +730,9 @@ public class PermissionBridge {
         Set<String> allPermissions = new HashSet<>(registry.getAllPermissions());
         allPermissions.addAll(scanner.getDiscoveredPermissions());
         
-        source.sendSuccess(() -> Component.literal("§6┌─ ALL NEOESSENTIALS PERMISSIONS ─┐"), false);
-        source.sendSuccess(() -> Component.literal("§eTotal: " + allPermissions.size() + " permissions"), false);
-        source.sendSuccess(() -> Component.literal("§eCopy these for PermissionsEX commands:"), false);
+        source.sendSuccess(() -> styled("┌─ ALL NEOESSENTIALS PERMISSIONS ─┐", ChatFormatting.GOLD), false);
+        source.sendSuccess(() -> styled("Total: " + allPermissions.size() + " permissions", ChatFormatting.YELLOW), false);
+        source.sendSuccess(() -> styled("Copy these for PermissionsEX commands:", ChatFormatting.YELLOW), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
         // Group by category for better organization
@@ -733,116 +749,116 @@ public class PermissionBridge {
             
             categoryPerms.sort(String::compareTo);
             
-            source.sendSuccess(() -> Component.literal("§a" + category.getDescription() + ":"), false);
+            source.sendSuccess(() -> styled(category.getDescription() + ":", ChatFormatting.GREEN), false);
             for (String permission : categoryPerms) {
-                source.sendSuccess(() -> Component.literal("§7  " + permission), false);
+                source.sendSuccess(() -> styled("  " + permission, ChatFormatting.GRAY), false);
             }
             source.sendSuccess(() -> Component.literal(""), false);
         }
         
-        source.sendSuccess(() -> Component.literal("§6=== WILDCARD PERMISSIONS ==="), false);
-        source.sendSuccess(() -> Component.literal("§7  neoessentials.*"), false);
+        source.sendSuccess(() -> styled("=== WILDCARD PERMISSIONS ===", ChatFormatting.GOLD), false);
+        source.sendSuccess(() -> styled("  neoessentials.*", ChatFormatting.GRAY), false);
         for (PermissionRegistry.PermissionCategory category : PermissionRegistry.PermissionCategory.values()) {
-            source.sendSuccess(() -> Component.literal("§7  neoessentials." + category.getKey() + ".*"), false);
+            source.sendSuccess(() -> styled("  neoessentials." + category.getKey() + ".*", ChatFormatting.GRAY), false);
         }
         
         source.sendSuccess(() -> Component.literal(""), false);
-        source.sendSuccess(() -> Component.literal("§eUse: §f/pex group <group> add <permission>"), false);
-        source.sendSuccess(() -> Component.literal("§eExport: §f/neoessentials-permissions export pex"), false);
+        source.sendSuccess(() -> styled("Use: ", ChatFormatting.YELLOW).append(styled("/pex group <group> add <permission>", ChatFormatting.WHITE)), false);
+        source.sendSuccess(() -> styled("Export: ", ChatFormatting.YELLOW).append(styled("/neoessentials-permissions export pex", ChatFormatting.WHITE)), false);
     }
     
     /**
      * Show PermissionsEX group command examples
      */
     private static void showGroupExamples(CommandSourceStack source) {
-        source.sendSuccess(() -> Component.literal("§6┌─ PermissionsEX Group Examples ─┐"), false);
-        source.sendSuccess(() -> Component.literal("§eUse these commands to set up permission groups:"), false);
+        source.sendSuccess(() -> styled("┌─ PermissionsEX Group Examples ─┐", ChatFormatting.GOLD), false);
+        source.sendSuccess(() -> styled("Use these commands to set up permission groups:", ChatFormatting.YELLOW), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§a▶ Admin Group (Full Access):"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group admin create"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group admin add neoessentials.*"), false);
+        source.sendSuccess(() -> styled("▶ Admin Group (Full Access):", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("/pex group admin create", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group admin add neoessentials.*", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§a▶ Moderator Group:"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group moderator create"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group moderator add neoessentials.teleport.*"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group moderator add neoessentials.chat.*"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group moderator add neoessentials.admin.permissions"), false);
+        source.sendSuccess(() -> styled("▶ Moderator Group:", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("/pex group moderator create", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group moderator add neoessentials.teleport.*", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group moderator add neoessentials.chat.*", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group moderator add neoessentials.admin.permissions", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§a▶ Player Group (Basic):"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group player create"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group player add neoessentials.teleport.home.home"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group player add neoessentials.teleport.home.set"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group player add neoessentials.teleport.spawn.spawn"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group player add neoessentials.economy.balance"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group player add neoessentials.economy.pay"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group player add neoessentials.chat.msg"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group player add neoessentials.chat.reply"), false);
+        source.sendSuccess(() -> styled("▶ Player Group (Basic):", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("/pex group player create", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group player add neoessentials.teleport.home.home", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group player add neoessentials.teleport.home.set", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group player add neoessentials.teleport.spawn.spawn", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group player add neoessentials.economy.balance", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group player add neoessentials.economy.pay", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group player add neoessentials.chat.msg", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group player add neoessentials.chat.reply", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§a▶ VIP Group:"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group vip create"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group vip add neoessentials.teleport.*"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group vip add neoessentials.economy.*"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group vip add neoessentials.kits.*"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group vip add neoessentials.utility.*"), false);
+        source.sendSuccess(() -> styled("▶ VIP Group:", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("/pex group vip create", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group vip add neoessentials.teleport.*", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group vip add neoessentials.economy.*", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group vip add neoessentials.kits.*", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group vip add neoessentials.utility.*", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§b▶ Tab completion should work for:"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group <groupname> add neoessentials.<TAB>"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex group <groupname> remove neoessentials.<TAB>"), false);
+        source.sendSuccess(() -> styled("▶ Tab completion should work for:", ChatFormatting.AQUA), false);
+        source.sendSuccess(() -> styled("/pex group <groupname> add neoessentials.<TAB>", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex group <groupname> remove neoessentials.<TAB>", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§c▶ If tab completion doesn't work:"), false);
-        source.sendSuccess(() -> Component.literal("§f1. Run: /neoessentials-permissions export pex"), false);
-        source.sendSuccess(() -> Component.literal("§f2. Add at least one permission to any group"), false);
-        source.sendSuccess(() -> Component.literal("§f3. Run: /pex reload"), false);
+        source.sendSuccess(() -> styled("▶ If tab completion doesn't work:", ChatFormatting.RED), false);
+        source.sendSuccess(() -> styled("1. Run: /neoessentials-permissions export pex", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("2. Add at least one permission to any group", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("3. Run: /pex reload", ChatFormatting.WHITE), false);
     }
     
     /**
      * Show PermissionsEX user command examples
      */
     private static void showUserExamples(CommandSourceStack source) {
-        source.sendSuccess(() -> Component.literal("§6┌─ PermissionsEX User Examples ─┐"), false);
-        source.sendSuccess(() -> Component.literal("§eUse these commands to grant permissions to specific users:"), false);
+        source.sendSuccess(() -> styled("┌─ PermissionsEX User Examples ─┐", ChatFormatting.GOLD), false);
+        source.sendSuccess(() -> styled("Use these commands to grant permissions to specific users:", ChatFormatting.YELLOW), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§a▶ Admin Permissions for Users:"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.teleport.admin.tp"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.teleport.admin.tphere"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.teleport.admin.tpall"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.economy.eco.give"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.admin.reload"), false);
+        source.sendSuccess(() -> styled("▶ Admin Permissions for Users:", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.teleport.admin.tp", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.teleport.admin.tphere", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.teleport.admin.tpall", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.economy.eco.give", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.admin.reload", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§a▶ Moderator Permissions for Users:"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.teleport.admin.tpo"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.chat.socialspy"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.chat.mute"), false);
+        source.sendSuccess(() -> styled("▶ Moderator Permissions for Users:", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.teleport.admin.tpo", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.chat.socialspy", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.chat.mute", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§a▶ Special Permissions for Users:"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.teleport.home.others"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.economy.balance.others"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.kits.starter.nocooldown"), false);
+        source.sendSuccess(() -> styled("▶ Special Permissions for Users:", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.teleport.home.others", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.economy.balance.others", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.kits.starter.nocooldown", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§a▶ Utility Permissions for Users:"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.utility.repair"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.utility.afk"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName add neoessentials.utility.dispose"), false);
+        source.sendSuccess(() -> styled("▶ Utility Permissions for Users:", ChatFormatting.GREEN), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.utility.repair", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.utility.afk", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName add neoessentials.utility.dispose", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§b▶ Tab completion should work for:"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user <username> add neoessentials.<TAB>"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user <username> remove neoessentials.<TAB>"), false);
+        source.sendSuccess(() -> styled("▶ Tab completion should work for:", ChatFormatting.AQUA), false);
+        source.sendSuccess(() -> styled("/pex user <username> add neoessentials.<TAB>", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user <username> remove neoessentials.<TAB>", ChatFormatting.WHITE), false);
         source.sendSuccess(() -> Component.literal(""), false);
         
-        source.sendSuccess(() -> Component.literal("§c▶ Remove permissions from users:"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName remove neoessentials.teleport.admin.tp"), false);
-        source.sendSuccess(() -> Component.literal("§f/pex user PlayerName remove neoessentials.*"), false);
+        source.sendSuccess(() -> styled("▶ Remove permissions from users:", ChatFormatting.RED), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName remove neoessentials.teleport.admin.tp", ChatFormatting.WHITE), false);
+        source.sendSuccess(() -> styled("/pex user PlayerName remove neoessentials.*", ChatFormatting.WHITE), false);
     }
     
     /**

@@ -36,7 +36,7 @@ public class ServerEndpoint implements HttpHandler {
         String path = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
         
-        LOGGER.info("ServerEndpoint handling request: {} {}", method, path);
+        LOGGER.debug("ServerEndpoint handling request: {} {}", method, path);
         
         try {
             // Only allow GET requests
@@ -48,7 +48,7 @@ public class ServerEndpoint implements HttpHandler {
             // Execute data collection on server thread for thread safety
             CompletableFuture<JsonObject> future = CompletableFuture.supplyAsync(() -> {
                 try {
-                    LOGGER.info("Collecting data for endpoint: {}", path);
+                    LOGGER.debug("Collecting data for endpoint: {}", path);
                     // Parse path to determine which endpoint
                     if (path.startsWith("/api/server/assets/")) {
                         // Get specific namespace assets
@@ -82,7 +82,7 @@ public class ServerEndpoint implements HttpHandler {
             JsonObject response;
             try {
                 response = future.get(10, TimeUnit.SECONDS);
-                LOGGER.info("Data collected successfully for: {}", path);
+                LOGGER.debug("Data collected successfully for: {}", path);
             } catch (java.util.concurrent.TimeoutException e) {
                 LOGGER.error("Timeout waiting for data collection: {}", path);
                 response = new JsonObject();

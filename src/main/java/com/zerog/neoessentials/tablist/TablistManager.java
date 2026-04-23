@@ -192,7 +192,12 @@ public class TablistManager {
     /**
      * Update all player row display names in the TAB list.
      * Uses Minecraft's Scoreboard Team system to set [prefix]PlayerName pingms.
-     * Teams are the standard way to format player names in the TAB list.
+     *
+     * IMPORTANT: Each player gets their OWN team (named "ne_" + scoreboardName)
+     * rather than a shared team per group. Scoreboard team prefix/suffix applies
+     * to every member of the team, so a shared team would force every player
+     * in that group to display the same ping (the last one written wins).
+     * Per-player teams give each row its own independent prefix and suffix.
      */
     private void updatePlayerRows(ServerPlayer viewer, MinecraftServer server) {
         try {
@@ -236,24 +241,58 @@ public class TablistManager {
                     teamPrefix = groupColor + "[player]§r ";
                 }
 
-                // Create or get the team for this group
-                String teamName = "ne_" + group;
+                // One team per player so each row carries its own prefix and suffix.
+                // Team names must be unique and stable per player — scoreboard name fits.
+                // Truncate to 16 chars (scoreboard team name limit) using a hash-suffix
+                // fallback for unusually long names.
+                String scoreboardName = target.getScoreboardName();
+                String teamName = "ne_" + scoreboardName;
+                if (teamName.length() > 16) {
+                    teamName = "ne_" + Integer.toHexString(scoreboardName.hashCode());
+                    if (teamName.length() > 16) teamName = teamName.substring(0, 16);
+                }
+
                 var team = scoreboard.getPlayerTeam(teamName);
                 if (team == null) {
                     team = scoreboard.addPlayerTeam(teamName);
                 }
 
-                // Update prefix and ping suffix
+                // Update prefix and per-player ping suffix
                 team.setPlayerPrefix(Component.literal(teamPrefix));
                 team.setPlayerSuffix(Component.literal(" " + pingColor + ping + "ms"));
 
-                // Add the player to the team if not already in it
-                if (!team.getPlayers().contains(target.getScoreboardName())) {
-                    scoreboard.addPlayerToTeam(target.getScoreboardName(), team);
+                // Add the player to their own team if not already in it
+                if (!team.getPlayers().contains(scoreboardName)) {
+                    scoreboard.addPlayerToTeam(scoreboardName, team);
                 }
             }
         } catch (Exception e) {
             LOGGER.debug("Failed to update player rows: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Remove a player's TAB-list team when they disconnect, so we don't leak
+     * scoreboard teams over time. Safe to call even if the team doesn't exist.
+     */
+    public void cleanupPlayerTeam(ServerPlayer player) {
+        try {
+            MinecraftServer server = player.getServer();
+            if (server == null) return;
+            var scoreboard = server.getScoreboard();
+            String scoreboardName = player.getScoreboardName();
+            String teamName = "ne_" + scoreboardName;
+            if (teamName.length() > 16) {
+                teamName = "ne_" + Integer.toHexString(scoreboardName.hashCode());
+                if (teamName.length() > 16) teamName = teamName.substring(0, 16);
+            }
+            var team = scoreboard.getPlayerTeam(teamName);
+            if (team != null) {
+                scoreboard.removePlayerTeam(team);
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Failed to clean up tablist team for {}: {}",
+                player.getName().getString(), e.getMessage());
         }
     }
 

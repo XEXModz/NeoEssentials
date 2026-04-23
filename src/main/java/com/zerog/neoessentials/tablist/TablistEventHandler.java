@@ -34,6 +34,10 @@ public class TablistEventHandler {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         MinecraftServer server = player.getServer();
         if (server == null) return;
+        // Remove the player's per-player tablist team so we don't leak teams over time.
+        // This is safe to call before clearCustomName/onPlayerQuit because it only
+        // touches the scoreboard team owned by this player.
+        TablistManager.getInstance().cleanupPlayerTeam(player);
         TablistManager.getInstance().clearCustomName(player.getUUID());
         TablistManager.getInstance().onPlayerQuit(server);
     }

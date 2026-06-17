@@ -1166,7 +1166,7 @@ public class ConfigManager {
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigManager.class);
-    // private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    // private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
     // Thread-safe singleton
     private static class SingletonHolder {
@@ -1322,7 +1322,7 @@ public class ConfigManager {
 
                 // Write merged result back
                 try (java.io.FileWriter writer = new java.io.FileWriter(configFile, StandardCharsets.UTF_8)) {
-                    new GsonBuilder().setPrettyPrinting().create().toJson(onDisk, writer);
+                    new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create().toJson(onDisk, writer);
                 }
 
                 configCache.remove(configName);

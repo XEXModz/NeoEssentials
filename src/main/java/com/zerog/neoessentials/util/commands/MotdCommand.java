@@ -32,7 +32,7 @@ public class MotdCommand {
     private static String motdAuthor = "Server";
     private static String motdTimestamp = "";
     private static final Path MOTD_DATA_FILE = Paths.get("config", "neoessentials", "motd_data.json");
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
     
     /**

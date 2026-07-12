@@ -1,3 +1,9 @@
+> **This repository is archived.**
+> Development of this fork continues as **[OP-Essentials](https://github.com/XEXModz/OP-Essentials)** —
+> same mod, new name, with all the fixes and features from 1.1.6 through 1.1.12
+> (vanish overhaul, chat fixes, live reloads and more). This tree stops at 1.1.5
+> and is kept for history only.
+
 # NeoEssentials
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1-brightgreen.svg)](https://www.minecraft.net/) [![NeoForge](https://img.shields.io/badge/NeoForge-orange.svg)](https://neoforged.net/) [![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://opensource.org/licenses/MIT) [![Version](https://img.shields.io/github/v/release/ZeroG-Network-PTY-LTD/NeoEssentials?label=Version)](https://github.com/ZeroG-Network-PTY-LTD/NeoEssentials/releases) [![Discord](https://img.shields.io/discord/709351422088708196?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/dUGAQF2Mga)
